@@ -662,7 +662,7 @@ $('#authForm').addEventListener('submit', (e) => {
    Agrega al dispositivo los libros del catálogo que falten (por id), SIN borrar
    préstamos ni ediciones. Subí CATALOG_VERSION cuando cambie el catálogo base. */
 function ensureCatalog() {
-  const CATALOG_VERSION = 1;
+  const CATALOG_VERSION = 2;
   const seededVer = parseInt(localStorage.getItem('biblioteca_gnosis_catalog_ver') || '0', 10);
   if (seededVer >= CATALOG_VERSION) return; // este dispositivo ya tiene esta versión
   const seed = [
@@ -699,7 +699,7 @@ function ensureCatalog() {
     { id: 'l31', title: 'Curso de Agricultura de la Nueva Era de Acuario', author: 'V.M. Lakhsmi', category: 'Medicina y Naturaleza', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l32', title: 'Tratado de Medicina Oculta y Magia Práctica', author: 'Samael Aun Weor', category: 'Medicina y Naturaleza', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l33', title: 'Tratado de Medicina Natural', author: 'A.G.E.A.C.', category: 'Medicina y Naturaleza', location: '', notes: '', stock: 1, loans: [] },
-    { id: 'l34', title: 'Seminario de Medicina Natural a través de la Gnosis', author: '', category: 'Medicina y Naturaleza', location: '', notes: '', stock: 1, loans: [] },
+    { id: 'l34', title: 'Seminario de Medicina Natural a través de la Gnosis', author: '', category: 'Medicina y Naturaleza', location: '', notes: 'Nota manuscrita: 7 copias', stock: 7, loans: [] },
     { id: 'l35', title: 'Las Facultades Paresensoriales', author: 'Samael Aun Weor', category: 'Medicina y Naturaleza', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l36', title: 'Manual de Procedimientos Litúrgicos', author: 'Iglesia Gnóstica Cristiana Argentina', category: 'Liturgia e Institución', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l37', title: 'Guía del Conferencista Gnóstico', author: 'Arnoldo Castillo Barajas', category: 'Liturgia e Institución', location: '', notes: '', stock: 1, loans: [] },
@@ -713,12 +713,29 @@ function ensureCatalog() {
     { id: 'l45', title: 'El Ultimátum (Convivencia S.S. 2003)', author: '', category: 'Convivencias', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l46', title: 'Runas — Guía Práctica', author: '', category: 'Otros', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l47', title: 'El Libro Tibetano de los Muertos', author: 'Editorial Estaciones', category: 'Otros', location: '', notes: 'La gran liberación por audición en el Bardo', stock: 1, loans: [] },
+    // --- Revistas / boletines (cantidades estimadas, revisar) ---
+    { id: 'm01', title: 'El Quinto Ángel (revista)', author: 'I.G.C.A.', category: 'Revistas', location: '', notes: 'Varios números (2007–2013). Cantidad a revisar.', stock: 11, loans: [] },
+    { id: 'm02', title: 'Urania Venus (revista)', author: 'Editorial Urania', category: 'Revistas', location: '', notes: 'Del Nº5 (2001) al Nº16 (2012). Cantidad a revisar.', stock: 5, loans: [] },
+    { id: 'm03', title: 'La Semilla (revista)', author: '', category: 'Revistas', location: '', notes: 'Donde germina la vida (Argentina). Cantidad a revisar.', stock: 4, loans: [] },
+    { id: 'm04', title: 'Gnosis — La Sabiduría del Ser Interno (revista)', author: 'A.G.E.A.C.A.C.', category: 'Revistas', location: '', notes: 'Nº7 (Dic 2011). Cantidad a revisar.', stock: 1, loans: [] },
+    { id: 'm05', title: 'Gnosis Arandu (revista)', author: 'ACEACG Paraguay', category: 'Revistas', location: '', notes: 'Edición Nº2. Cantidad a revisar.', stock: 1, loans: [] },
+    { id: 'm06', title: 'El Alquimista (revista)', author: '', category: 'Revistas', location: '', notes: 'Nº0 (Septiembre 1999). Cantidad a revisar.', stock: 1, loans: [] },
   ];
-  const existingIds = new Set(books.map(b => b.id));
-  let added = 0;
-  seed.forEach(sb => { if (!existingIds.has(sb.id)) { books.push({ ...sb, loans: [] }); added++; } });
+  // Combinar por versión: agrega los que falten y actualiza los del catálogo base,
+  // conservando los préstamos y sin tocar libros cargados a mano.
+  const byId = new Map(books.map(b => [b.id, b]));
+  seed.forEach(sb => {
+    const ex = byId.get(sb.id);
+    if (ex) {
+      ex.title = sb.title; ex.author = sb.author; ex.category = sb.category;
+      ex.notes = sb.notes; ex.stock = sb.stock;
+      if (!Array.isArray(ex.loans)) ex.loans = [];
+    } else {
+      books.push({ ...sb, loans: [] });
+    }
+  });
   localStorage.setItem('biblioteca_gnosis_catalog_ver', String(CATALOG_VERSION));
-  if (added > 0) save();
+  save();
 }
 
 /* -------------------- Init -------------------- */
