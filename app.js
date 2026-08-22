@@ -658,11 +658,14 @@ $('#authForm').addEventListener('submit', (e) => {
   }
 });
 
-/* -------------------- Datos de ejemplo (solo primera vez) -------------------- */
-function seedIfEmpty() {
-  if (books.length > 0) return;
-  if (localStorage.getItem(STORE_KEY)) return; // ya usó la app y la vació a propósito
-  books = [
+/* -------------------- Catálogo base (se combina por versión) --------------------
+   Agrega al dispositivo los libros del catálogo que falten (por id), SIN borrar
+   préstamos ni ediciones. Subí CATALOG_VERSION cuando cambie el catálogo base. */
+function ensureCatalog() {
+  const CATALOG_VERSION = 1;
+  const seededVer = parseInt(localStorage.getItem('biblioteca_gnosis_catalog_ver') || '0', 10);
+  if (seededVer >= CATALOG_VERSION) return; // este dispositivo ya tiene esta versión
+  const seed = [
     { id: 'l01', title: 'Curso Zodiacal', author: 'Samael Aun Weor', category: 'Astrología', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l02', title: 'Alcione y las Pléyades', author: 'Samael Aun Weor', category: 'Astrología', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l03', title: 'Tratado Esotérico de Astrología Hermética', author: 'Samael Aun Weor', category: 'Astrología', location: '', notes: '', stock: 1, loans: [] },
@@ -711,10 +714,14 @@ function seedIfEmpty() {
     { id: 'l46', title: 'Runas — Guía Práctica', author: '', category: 'Otros', location: '', notes: '', stock: 1, loans: [] },
     { id: 'l47', title: 'El Libro Tibetano de los Muertos', author: 'Editorial Estaciones', category: 'Otros', location: '', notes: 'La gran liberación por audición en el Bardo', stock: 1, loans: [] },
   ];
-  save();
+  const existingIds = new Set(books.map(b => b.id));
+  let added = 0;
+  seed.forEach(sb => { if (!existingIds.has(sb.id)) { books.push({ ...sb, loans: [] }); added++; } });
+  localStorage.setItem('biblioteca_gnosis_catalog_ver', String(CATALOG_VERSION));
+  if (added > 0) save();
 }
 
 /* -------------------- Init -------------------- */
-seedIfEmpty();
+ensureCatalog();
 applyAuthUI();
 render();
