@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Gestión de la biblioteca del Lumisial Alden de Gnosis: préstamos, stock y disponibilidad de libros." />
+  <title>Biblioteca Gnosis Lumisial Alden</title>
+  <link rel="icon" type="image/png" href="assets/logo.png?v=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=8" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div class="brand">
+        <img class="brand-mark" src="assets/logo.png?v=1" alt="Emblema — Asociación Cultural de Estudios Gnósticos" />
+        <div class="brand-text">
+          <h1>Biblioteca Gnosis</h1>
+          <p>Lumisial Alden</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="btnTheme" class="icon-btn" title="Cambiar tema" aria-label="Cambiar tema">🌙</button>
+        <button id="btnPrint" class="btn ghost" title="Imprimir préstamos activos">🖨️ Préstamos</button>
+        <button id="btnExport" class="btn ghost" title="Descargar respaldo JSON">Exportar</button>
+        <button id="btnImportTrigger" class="btn ghost admin-only" title="Cargar respaldo JSON">Importar</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden />
+        <button id="btnAdd" class="btn primary admin-only">+ Agregar libro</button>
+        <button id="btnAuth" class="btn ghost" title="Ingresar / Salir">🔒 Ingresar</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <button type="button" id="overdueAlert" class="overdue-alert" hidden></button>
+
+    <section class="stats" id="stats"></section>
+
+    <section class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon" aria-hidden="true">🔍</span>
+        <input id="search" type="search" placeholder="Buscar por título, autor o categoría…" />
+      </div>
+      <div class="filters">
+        <select id="filterCategory" aria-label="Filtrar por categoría">
+          <option value="">Todas las categorías</option>
+        </select>
+        <select id="filterAvail" aria-label="Filtrar por disponibilidad">
+          <option value="">Todos</option>
+          <option value="available">Disponibles</option>
+          <option value="borrowed">Con préstamos activos</option>
+          <option value="overdue">Con vencidos</option>
+          <option value="none">Sin ejemplares libres</option>
+        </select>
+        <select id="sortBy" aria-label="Ordenar">
+          <option value="title">Ordenar: Título</option>
+          <option value="author">Ordenar: Autor</option>
+          <option value="category">Ordenar: Categoría</option>
+          <option value="available">Ordenar: Disponibilidad</option>
+        </select>
+      </div>
+    </section>
+
+    <section id="grid" class="grid"></section>
+    <div id="empty" class="empty" hidden></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Los datos se guardan en este dispositivo (navegador). Usá <strong>Exportar</strong> para respaldar y compartir.</p>
+    </div>
+  </footer>
+
+  <!-- Modal: Alta / Edición de libro -->
+  <div class="modal-backdrop" id="bookModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookModalTitle">
+      <div class="modal-head">
+        <h2 id="bookModalTitle">Agregar libro</h2>
+        <button class="icon-btn" data-close aria-label="Cerrar">✕</button>
+      </div>
+      <form id="bookForm" class="modal-body">
+        <input type="hidden" id="bookId" />
+        <label>Título *
+          <input id="fTitle" type="text" required maxlength="200" />
+        </label>
+        <label>Autor
+          <input id="fAuthor" type="text" maxlength="200" />
+        </label>
+        <div class="row">
+          <label>Categoría
+            <input id="fCategory" type="text" list="catList" maxlength="80" placeholder="Ej: Gnosis, Alquimia…" />
+            <datalist id="catList"></datalist>
+          </label>
+          <label>Ejemplares (stock) *
+            <input id="fStock" type="number" min="1" step="1" value="1" required />
+          </label>
+        </div>
+        <label>Ubicación / Estante
+          <input id="fLocation" type="text" maxlength="120" placeholder="Ej: Estante A2" />
+        </label>
+        <label>Notas
+          <textarea id="fNotes" rows="3" maxlength="1000" placeholder="Descripción, estado, edición…"></textarea>
+        </label>
+        <p class="form-hint" id="stockHint"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" data-close>Cancelar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Préstamo -->
+  <div class="modal-backdrop" id="loanModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loanModalTitle">
+      <div class="modal-head">
+        <h2 id="loanModalTitle">Prestar libro</h2>
+        <button class="icon-btn" data-close aria-label="Cerrar">✕</button>
+      </div>
+      <form id="loanForm" class="modal-body">
+        <input type="hidden" id="loanBookId" />
+        <p class="loan-book-name" id="loanBookName"></p>
+        <label>Nombre de quien lo lleva *
+          <input id="lName" type="text" required maxlength="160" placeholder="Nombre y apellido" />
+        </label>
+        <div class="row">
+          <label>Fecha de préstamo *
+            <input id="lDate" type="date" required />
+          </label>
+          <label>Días solicitados
+            <input id="lDays" type="number" min="1" step="1" value="15" />
+          </label>
+        </div>
+        <label>Contacto (opcional)
+          <input id="lContact" type="text" maxlength="160" placeholder="Teléfono / email" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" data-close>Cancelar</button>
+          <button type="submit" class="btn primary">Registrar préstamo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Préstamos activos / devolución -->
+  <div class="modal-backdrop" id="loansListModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loansListTitle">
+      <div class="modal-head">
+        <h2 id="loansListTitle">Préstamos</h2>
+        <button class="icon-btn" data-close aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-body" id="loansListBody"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Login del administrador -->
+  <div class="modal-backdrop" id="authModal" hidden>
+    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="modal-head">
+        <h2 id="authTitle">Ingresar</h2>
+        <button class="icon-btn" data-close aria-label="Cerrar">✕</button>
+      </div>
+      <form id="authForm" class="modal-body">
+        <p class="form-hint">Solo el administrador puede agregar, editar o prestar libros.</p>
+        <label>Usuario
+          <input id="authUser" type="text" autocomplete="username" required />
+        </label>
+        <label>Contraseña
+          <input id="authPass" type="password" autocomplete="current-password" required />
+        </label>
+        <p class="auth-error" id="authError" hidden>Usuario o contraseña incorrectos.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" data-close>Cancelar</button>
+          <button type="submit" class="btn primary">Ingresar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Área de impresión (solo visible al imprimir) -->
+  <div id="printArea" class="print-area" aria-hidden="true"></div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" hidden></div>
+
+  <!-- Confirmación -->
+  <div class="modal-backdrop" id="confirmModal" hidden>
+    <div class="modal small" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <div class="modal-head">
+        <h2 id="confirmTitle">Confirmar</h2>
+        <button class="icon-btn" data-close aria-label="Cerrar">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirmText"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" data-close>Cancelar</button>
+          <button type="button" class="btn danger" id="confirmOk">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=6"></script>
+</body>
+</html>

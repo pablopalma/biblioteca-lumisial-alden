@@ -1,0 +1,458 @@
+:root {
+  /* Paleta clara: pergamino azulado con acentos azul + dorado del emblema gnóstico */
+  --bg: #eaeef7;
+  --bg-2: #dce3f1;
+  --surface: #ffffff;
+  --surface-2: #f1f5fc;
+  --ink: #15213f;
+  --ink-soft: #5b6a8d;
+  --line: #d3dbec;
+  --accent: #274ca3;        /* azul gnóstico (acción principal) */
+  --accent-2: #3862c6;       /* azul hover */
+  --gold: #b0851b;          /* dorado */
+  --green: #2e7d4f;
+  --green-bg: #e3f1e8;
+  --red: #b0392c;           /* peligro / vencidos */
+  --red-bg: #f7e6e3;
+  --amber: #8a6410;
+  --amber-bg: #f5ebd4;
+  /* Colores del emblema (trinidad) */
+  --brand-blue: #234aa0;
+  --brand-yellow: #e6b100;
+  --brand-red: #c0392b;
+  --shadow: 0 6px 24px rgba(20, 35, 80, 0.12);
+  --radius: 14px;
+  --radius-sm: 9px;
+}
+
+[data-theme="dark"] {
+  /* Paleta oscura: azul noche estrellado del logo con dorado */
+  --bg: #0a1330;
+  --bg-2: #0d1838;
+  --surface: #14204a;
+  --surface-2: #1b2856;
+  --ink: #e9f0ff;
+  --ink-soft: #9fb0d8;
+  --line: #2a3763;
+  --accent: #7c9be8;
+  --accent-2: #9ab2f0;
+  --gold: #e2c15a;
+  --green: #6fbf87;
+  --green-bg: #1c3326;
+  --red: #e0837b;
+  --red-bg: #3a201e;
+  --amber: #e0b95c;
+  --amber-bg: #33280f;
+  --brand-blue: #4f74d6;
+  --brand-yellow: #eab308;
+  --brand-red: #d9534a;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+* { box-sizing: border-box; }
+
+/* Fuerza que el atributo `hidden` realmente oculte, aunque el elemento
+   tenga display: grid/flex. Sin esto, los modales nunca se cerraban. */
+[hidden] { display: none !important; }
+
+/* Controles solo para el administrador: ocultos salvo que haya sesión. */
+.admin-only { display: none !important; }
+body.is-admin .admin-only { display: inline-flex !important; }
+
+.auth-error { color: var(--red); font-size: 0.85rem; margin: 0; font-weight: 600; }
+
+body {
+  margin: 0;
+  font-family: 'Nunito Sans', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { width: min(1180px, 100% - 2.4rem); margin-inline: auto; }
+
+/* Marcellus tiene un solo peso: evitar negrita sintética en títulos */
+h1, h2, h3, .stat .num { font-weight: 400; letter-spacing: 0.3px; }
+
+/* ---------- Header ---------- */
+.site-header {
+  /* Azul noche estrellado del emblema (siempre, en tema claro y oscuro) */
+  background:
+    radial-gradient(1.5px 1.5px at 12% 30%, rgba(255,255,255,.85), transparent),
+    radial-gradient(1px 1px at 28% 65%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1.5px 1.5px at 47% 22%, rgba(255,255,255,.75), transparent),
+    radial-gradient(1px 1px at 63% 55%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1.5px 1.5px at 80% 35%, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 92% 70%, rgba(255,255,255,.55), transparent),
+    radial-gradient(120% 140% at 50% 0%, #1c3273 0%, #101f52 45%, #0a1436 100%);
+  border-bottom: 2px solid rgba(201, 162, 39, 0.45);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 4px 18px rgba(10, 20, 54, 0.35);
+}
+/* En el header (fondo oscuro) los controles van claros, sin importar el tema */
+.site-header .btn.ghost { color: #eaf0ff; border-color: rgba(234, 240, 255, 0.28); }
+.site-header .btn.ghost:hover { background: rgba(234, 240, 255, 0.12); }
+.site-header .icon-btn { color: #eaf0ff; border-color: rgba(234, 240, 255, 0.28); }
+.site-header .icon-btn:hover { background: rgba(234, 240, 255, 0.12); }
+.site-header .btn.primary { background: var(--gold); color: #1a1204; }
+.site-header .btn.primary:hover { background: #d9b64a; }
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.8rem;
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: 0.8rem; }
+.brand-mark {
+  width: 56px; height: 56px;
+  flex-shrink: 0;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45));
+}
+.brand-text h1 {
+  font-family: 'Marcellus', 'Cormorant Garamond', serif;
+  font-size: 1.9rem;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: 1.5px;
+  color: #f0d488;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+.brand-text p {
+  margin: 3px 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #aebbdd;
+}
+.header-actions { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.06s ease, background 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); color: #fff; box-shadow: var(--shadow); }
+.btn.primary:hover { background: var(--accent-2); }
+.btn.ghost { background: transparent; border-color: var(--line); color: var(--ink); }
+.btn.ghost:hover { background: var(--surface-2); }
+.btn.danger { background: var(--red); color: #fff; }
+.btn.small { padding: 0.4rem 0.7rem; font-size: 0.82rem; }
+.icon-btn {
+  font-size: 1.1rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: grid; place-items: center;
+}
+.icon-btn:hover { background: var(--surface-2); }
+
+/* ---------- Aviso de vencidos ---------- */
+.overdue-alert {
+  width: 100%;
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: left;
+  font: inherit;
+  font-weight: 600;
+  color: var(--red);
+  background: var(--red-bg);
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.overdue-alert:hover { filter: brightness(0.98); }
+.overdue-alert .ico { font-size: 1.2rem; }
+.overdue-alert .go { margin-left: auto; font-size: 0.85rem; opacity: 0.85; }
+
+/* ---------- Stats ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+  margin: 1.4rem 0 1rem;
+}
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  box-shadow: var(--shadow);
+}
+.stat .num {
+  font-family: 'Marcellus', 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--gold);
+}
+.stat { border-top: 3px solid var(--brand-blue); }
+.stat:nth-child(2) { border-top-color: var(--brand-yellow); }
+.stat:nth-child(3) { border-top-color: var(--green); }
+.stat:nth-child(4) { border-top-color: var(--brand-red); }
+.stat .label { font-size: 0.72rem; color: var(--ink-soft); margin-top: 5px; text-transform: uppercase; letter-spacing: 1.5px; }
+
+/* ---------- Toolbar ---------- */
+.toolbar {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.2rem;
+}
+.search-wrap { position: relative; flex: 1 1 260px; }
+.search-icon { position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); opacity: 0.5; }
+.search-wrap input {
+  width: 100%;
+  padding: 0.65rem 0.8rem 0.65rem 2.3rem;
+}
+.filters { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+input, select, textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.7rem;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(184, 147, 79, 0.18);
+}
+select { cursor: pointer; }
+
+/* ---------- Grid & cards ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  box-shadow: var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  /* Trinidad del emblema: azul, amarillo, rojo */
+  background: linear-gradient(180deg, var(--brand-blue) 0%, var(--brand-yellow) 50%, var(--brand-red) 100%);
+}
+.card-top { display: flex; justify-content: space-between; gap: 0.5rem; align-items: flex-start; }
+.card h3 {
+  font-family: 'Marcellus', 'Cormorant Garamond', serif;
+  font-size: 1.42rem;
+  margin: 0;
+  line-height: 1.2;
+  color: var(--accent);
+}
+.card .author { color: var(--ink-soft); font-size: 0.9rem; }
+.card .meta { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.1rem; }
+.chip {
+  font-size: 0.74rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+.badge {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge.ok { background: var(--green-bg); color: var(--green); }
+.badge.no { background: var(--red-bg); color: var(--red); }
+.stock-line { font-size: 0.9rem; color: var(--ink-soft); }
+.stock-line strong { color: var(--ink); }
+.notes { font-size: 0.86rem; color: var(--ink-soft); margin: 0; }
+
+.loans-mini { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.2rem; }
+.loan-mini {
+  font-size: 0.82rem;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.55rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: center;
+}
+.loan-mini .who { font-weight: 600; color: var(--ink); }
+.loan-mini .days { color: var(--ink-soft); }
+.loan-mini .days.overdue { color: var(--red); font-weight: 600; }
+
+.card-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 0.4rem;
+}
+.card-actions .spacer { flex: 1; }
+
+/* ---------- Empty ---------- */
+.empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--ink-soft);
+}
+.empty h2 { font-family: 'Marcellus', 'Cormorant Garamond', serif; }
+
+/* ---------- Footer ---------- */
+.site-footer {
+  margin-top: 3rem;
+  padding: 1.4rem 0;
+  border-top: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* ---------- Modal ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 22, 8, 0.5);
+  backdrop-filter: blur(3px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 50;
+  animation: fade 0.12s ease;
+}
+@keyframes fade { from { opacity: 0; } }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  width: min(520px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  animation: pop 0.14s ease;
+}
+.modal.small { width: min(400px, 100%); }
+@keyframes pop { from { transform: translateY(8px) scale(0.98); opacity: 0; } }
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+.modal-head h2 { font-family: 'Marcellus', 'Cormorant Garamond', serif; font-size: 1.6rem; margin: 0; letter-spacing: 0.5px; }
+.modal-body { padding: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.modal-body label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; font-weight: 500; color: var(--ink-soft); }
+.modal-body label input, .modal-body label textarea, .modal-body label select { font-weight: 400; color: var(--ink); }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 0.4rem; }
+.form-hint { font-size: 0.8rem; color: var(--amber); margin: 0; }
+.loan-book-name { font-family: 'Marcellus', 'Cormorant Garamond', serif; font-size: 1.3rem; margin: 0 0 0.2rem; color: var(--accent); }
+
+/* Loans list in modal */
+.loan-row {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--surface-2);
+}
+.loan-row .info { font-size: 0.88rem; }
+.loan-row .info b { display: block; font-size: 0.98rem; color: var(--ink); }
+.loan-row .info small { color: var(--ink-soft); }
+.loan-row .info .overdue { color: var(--red); font-weight: 600; }
+.loans-section-title { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--ink-soft); margin: 0.4rem 0 0.2rem; }
+.no-loans { color: var(--ink-soft); font-size: 0.9rem; }
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 0.7rem 1.2rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: var(--shadow);
+  z-index: 100;
+  animation: toastIn 0.2s ease;
+}
+@keyframes toastIn { from { transform: translate(-50%, 12px); opacity: 0; } }
+
+/* ---------- Impresión ---------- */
+.print-area { display: none; }
+
+@media print {
+  body { background: #fff; color: #000; }
+  .site-header, .toolbar, .stats, .grid, .empty, .site-footer,
+  .overdue-alert, .modal-backdrop, .toast { display: none !important; }
+  .print-area { display: block; padding: 0; }
+  .print-area h1 { font-family: 'Marcellus', 'Cormorant Garamond', serif; margin: 0 0 0.2rem; }
+  .print-area .print-sub { color: #444; margin: 0 0 1rem; font-size: 0.9rem; }
+  .print-area table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .print-area th, .print-area td {
+    border: 1px solid #999; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top;
+  }
+  .print-area th { background: #eee; }
+  .print-area tr.overdue td { color: #a6392f; font-weight: 600; }
+  .print-area .none { color: #444; }
+  @page { margin: 1.5cm; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .brand-text h1 { font-size: 1.3rem; }
+  .header-actions .btn { padding: 0.5rem 0.7rem; font-size: 0.85rem; }
+  .row { grid-template-columns: 1fr; }
+  .wrap { width: min(1180px, 100% - 1.6rem); }
+}
+@media (max-width: 460px) {
+  .header-actions { width: 100%; justify-content: space-between; }
+  .grid { grid-template-columns: 1fr; }
+}
