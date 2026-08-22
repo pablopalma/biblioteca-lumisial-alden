@@ -35,17 +35,6 @@ Sin sesión, cualquiera puede **ver** el catálogo, buscar y consultar préstamo
 pero **no puede modificar** nada. La sesión queda guardada en el dispositivo hasta
 que se toca **🔓 Salir**.
 
-Para cambiar el usuario/contraseña, editá estas líneas al inicio de `app.js`:
-
-```js
-const ADMIN_USER = 'adminalden';
-const ADMIN_PASS = 'admin123';
-```
-
-> ⚠️ **Este login NO es seguridad real.** Al ser un sitio estático, el usuario y la
-> contraseña están en el código y alguien con conocimientos técnicos puede verlos o
-> saltear el bloqueo. Sirve para evitar ediciones accidentales de personas comunes,
-> no para proteger frente a alguien malintencionado.
 
 ## ⚠️ Importante sobre los datos
 
