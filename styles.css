@@ -300,6 +300,7 @@ select { cursor: pointer; }
 .stock-line { font-size: 0.9rem; color: var(--ink-soft); }
 .stock-line strong { color: var(--ink); }
 .notes { font-size: 0.86rem; color: var(--ink-soft); margin: 0; }
+.card .desc { font-size: 0.9rem; color: var(--ink); margin: 0; font-style: italic; opacity: 0.92; line-height: 1.4; }
 
 .loans-mini { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.2rem; }
 .loan-mini {

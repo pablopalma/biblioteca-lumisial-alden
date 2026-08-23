@@ -239,6 +239,7 @@ function cardHTML(b) {
       </div>
       ${badge}
     </div>
+    ${b.description ? `<p class="desc">${escapeHtml(b.description)}</p>` : ''}
     <div class="meta">
       ${b.category ? `<span class="chip">${escapeHtml(b.category)}</span>` : ''}
       ${b.location ? `<span class="chip">📍 ${escapeHtml(b.location)}</span>` : ''}
@@ -291,6 +292,7 @@ function openBookForm(book = null) {
     $('#fAuthor').value = book.author || '';
     $('#fCategory').value = book.category || '';
     $('#fStock').value = book.stock || 1;
+    $('#fDescription').value = book.description || '';
     $('#fLocation').value = book.location || '';
     $('#fNotes').value = book.notes || '';
     const act = activeLoans(book).length;
@@ -312,6 +314,7 @@ $('#bookForm').addEventListener('submit', (e) => {
     title,
     author: $('#fAuthor').value.trim(),
     category: $('#fCategory').value.trim(),
+    description: $('#fDescription').value.trim(),
     location: $('#fLocation').value.trim(),
     notes: $('#fNotes').value.trim(),
     stock,
@@ -662,7 +665,7 @@ $('#authForm').addEventListener('submit', (e) => {
    Agrega al dispositivo los libros del catálogo que falten (por id), SIN borrar
    préstamos ni ediciones. Subí CATALOG_VERSION cuando cambie el catálogo base. */
 function ensureCatalog() {
-  const CATALOG_VERSION = 3;
+  const CATALOG_VERSION = 4;
   const seededVer = parseInt(localStorage.getItem('biblioteca_gnosis_catalog_ver') || '0', 10);
   if (seededVer >= CATALOG_VERSION) return; // este dispositivo ya tiene esta versión
   const seed = [
@@ -721,14 +724,71 @@ function ensureCatalog() {
     { id: 'm05', title: 'Gnosis Arandu (revista)', author: 'ACEACG Paraguay', category: 'Revistas', location: '', notes: 'Edición Nº2. Cantidad a revisar.', stock: 1, loans: [] },
     { id: 'm06', title: 'El Alquimista (revista)', author: '', category: 'Revistas', location: '', notes: 'Nº0 (Septiembre 1999). Cantidad a revisar.', stock: 1, loans: [] },
   ];
+  // Sinopsis cortas por libro (no reemplaza el prólogo; evita derechos de autor).
+  const DESCRIPTIONS = {
+    l01: 'Estudio esotérico de los doce signos del zodíaco y su influencia en el desarrollo interior del ser humano.',
+    l02: 'Enseñanza sobre la constelación de las Pléyades y Alcyone, y su relación cósmica con la humanidad.',
+    l03: 'Tratado de astrología oculta, signo por signo, y su acción sobre el alma y el destino.',
+    l04: 'Meditación gnóstica sobre el sacrificio del Cristo en la cruz y su significado interior.',
+    l05: 'Lectura gnóstica del Evangelio de Judas y el papel del traidor en el drama crístico.',
+    l06: 'El drama cósmico del Cristo y el simbolismo esotérico de la Semana Santa.',
+    l07: 'Comentario gnóstico al antiguo evangelio Pistis Sophia sobre la caída y el retorno del alma.',
+    l08: 'Mensaje anual del Maestro con enseñanzas y directrices para el año entrante.',
+    l09: 'Mensaje anual del Maestro con enseñanzas y directrices para el año entrante.',
+    l10: 'Tratado iniciático sobre el despertar de la conciencia y los caminos internos del Ser.',
+    l11: 'Obra central de la gnosis: la transmutación de la energía creadora como vía de regeneración espiritual.',
+    l12: 'Psicología gnóstica para la transformación interior y la disolución del ego.',
+    l13: 'Síntesis de la enseñanza gnóstica para el hombre moderno del siglo XX.',
+    l14: 'Relato esotérico de experiencias del autor y enseñanzas del Oriente.',
+    l15: 'Manifiesto de los principios universales de la enseñanza gnóstica.',
+    l16: 'Preguntas y respuestas fundamentales de la doctrina gnóstica.',
+    l17: 'Explicación gnóstica sobre la existencia del infierno, el diablo y la ley del karma.',
+    l18: 'Prácticas para el desdoblamiento astral consciente y el despertar de la conciencia.',
+    l19: 'Reflexiones gnósticas sobre los platillos voladores y la vida en otros mundos.',
+    l20: 'La sabiduría gnóstica de las antiguas culturas de Anáhuac (México) y sus misterios.',
+    l21: 'Alquimia interior y la relación entre los metales, los planetas y el trabajo espiritual.',
+    l22: 'Curso de alquimia interior: transmutación de las energías y regeneración del ser.',
+    l23: 'Segunda parte del curso de alquimia interior y transmutación de las energías.',
+    l24: 'La teurgia: la magia blanca y la comunicación consciente con los seres superiores.',
+    l25: 'Prácticas de teurgia y trabajo con las fuerzas superiores desde la gnosis.',
+    l26: 'Enseñanzas prácticas para el trabajo interior, reunidas como "joyas" de sabiduría.',
+    l27: 'Sobre el retorno del Mesías y la esperanza espiritual de la humanidad.',
+    l28: 'Sobre el Íntimo o Ser interior (el Daimón divino) que guía al aspirante.',
+    l29: 'Reflexiones del autor sobre la senda del autoconocimiento y la investigación interior.',
+    l30: 'El karma, el libre albedrío y las leyes que rigen el destino humano.',
+    l31: 'Agricultura biológica y armónica según los principios gnósticos de la Nueva Era.',
+    l32: 'Compendio de plantas, elementales y recetas de medicina oculta y magia práctica.',
+    l33: 'Medicina natural y alternativas de curación desde la visión gnóstica.',
+    l34: 'Temas de medicina natural, alimentación y salud a la luz de la Gnosis.',
+    l35: 'El desarrollo de la clarividencia y demás facultades internas del ser humano.',
+    l36: 'Normas y procedimientos para los rituales y prácticas litúrgicas gnósticas.',
+    l37: 'Guía para preparar y dictar conferencias gnósticas.',
+    l38: 'Sobre el rol, los deberes y la preparación del sacerdote gnóstico.',
+    l39: 'Plan de estudios para los estudiantes de primeras cámaras.',
+    l40: 'Introducción a la gnosis como síntesis de las grandes tradiciones (enseñanzas de Samael).',
+    l41: 'Devoción y simbolismo esotérico de la Virgen del Carmen (RAM-IO).',
+    l42: 'El uso esotérico y oracional de los Salmos bíblicos.',
+    l43: 'Selección de textos y pasajes bíblicos comentados desde la gnosis.',
+    l44: 'Diálogos sobre temas esotéricos y gnósticos.',
+    l45: '',
+    l46: 'Guía práctica del alfabeto rúnico y su uso.',
+    l47: 'Texto clásico tibetano (Bardo Thödol) sobre el proceso de la muerte y el más allá.',
+    m01: 'Revista de difusión de la I.G.C.A. con artículos gnósticos (varios números).',
+    m02: 'Revista gnóstica con temas de doctrina, ciencia y espiritualidad (varios números).',
+    m03: 'Revista gnóstica argentina de difusión y cultura.',
+    m04: 'Revista de la A.G.E.A.C.A.C. con enseñanzas gnósticas.',
+    m05: 'Revista gnóstica de difusión (Paraguay).',
+    m06: 'Revista gnóstica de difusión (Argentina).',
+  };
   // Combinar por versión: agrega los que falten y actualiza los del catálogo base,
   // conservando los préstamos y sin tocar libros cargados a mano.
   const byId = new Map(books.map(b => [b.id, b]));
   seed.forEach(sb => {
+    sb.description = DESCRIPTIONS[sb.id] || '';
     const ex = byId.get(sb.id);
     if (ex) {
       ex.title = sb.title; ex.author = sb.author; ex.category = sb.category;
-      ex.notes = sb.notes; ex.stock = sb.stock;
+      ex.notes = sb.notes; ex.stock = sb.stock; ex.description = sb.description;
       if (!Array.isArray(ex.loans)) ex.loans = [];
     } else {
       books.push({ ...sb, loans: [] });
